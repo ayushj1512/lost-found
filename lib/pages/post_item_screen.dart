@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -34,12 +33,14 @@ class _PostItemScreenState extends State<PostItemScreen> {
 
   void _submitItem() {
     if (_formKey.currentState!.validate()) {
-      // Simulate success
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('🎉 Item Posted Successfully!')),
+        const SnackBar(
+          content: Text('🎉 Item Posted Successfully!'),
+          backgroundColor: Color(0xFF1565C0),
+        ),
       );
 
-      // Reset fields
+      // Clear form
       titleController.clear();
       descController.clear();
       trainController.clear();
@@ -54,6 +55,13 @@ class _PostItemScreenState extends State<PostItemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F8),
+      appBar: AppBar(
+        title: const Text('Post an Item'),
+        backgroundColor: const Color(0xFF1565C0),
+        foregroundColor: Colors.white,
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -67,19 +75,13 @@ class _PostItemScreenState extends State<PostItemScreen> {
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                     .toList(),
                 onChanged: (val) => setState(() => selectedType = val!),
-                decoration: const InputDecoration(
-                  labelText: 'Type',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: _inputDecoration('Type'),
               ),
               const SizedBox(height: 16),
 
               TextFormField(
                 controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: _inputDecoration('Title'),
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter a title' : null,
               ),
@@ -87,10 +89,7 @@ class _PostItemScreenState extends State<PostItemScreen> {
 
               TextFormField(
                 controller: descController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: _inputDecoration('Description'),
                 maxLines: 3,
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter description' : null,
@@ -103,46 +102,53 @@ class _PostItemScreenState extends State<PostItemScreen> {
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                     .toList(),
                 onChanged: (val) => setState(() => selectedCategory = val!),
-                decoration: const InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: _inputDecoration('Category'),
               ),
               const SizedBox(height: 16),
 
               TextFormField(
                 controller: trainController,
-                decoration: const InputDecoration(
-                  labelText: 'Train No. / Station',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: _inputDecoration('Train No. / Station'),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               Text(
                 'Upload Photo',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
-              InkWell(
+              GestureDetector(
                 onTap: _pickImage,
                 child: Container(
-                  height: 150,
+                  height: 160,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                    color: Colors.grey[100],
                   ),
                   child: selectedImage != null
-                      ? Image.file(selectedImage!, fit: BoxFit.cover)
-                      : const Center(
-                          child: Icon(
-                            Icons.upload_rounded,
-                            size: 40,
-                            color: Colors.grey,
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            selectedImage!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
                           ),
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.cloud_upload,
+                                size: 50, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text('Tap to upload image',
+                                style: TextStyle(color: Colors.grey)),
+                          ],
                         ),
                 ),
               ),
@@ -150,24 +156,37 @@ class _PostItemScreenState extends State<PostItemScreen> {
 
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: _submitItem,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    backgroundColor: const Color(0xFFFFEB3B),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text(
                     'Submit Item',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Color(0xFF1565C0), width: 2),
+        borderRadius: BorderRadius.circular(10),
       ),
     );
   }

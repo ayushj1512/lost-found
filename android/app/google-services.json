@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "368011583682",
+    "project_id": "cris-lost-and-found",
+    "storage_bucket": "cris-lost-and-found.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:368011583682:android:e2c01944a24e0f501e5b5b",
+        "android_client_info": {
+          "package_name": "com.example.lostandfound"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "368011583682-pkrbnse4t5qongd7b80cq7jjp880aeos.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmxvKanWvSLvbUvQqGCw7Mxv_ZYHeRDzY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "368011583682-pkrbnse4t5qongd7b80cq7jjp880aeos.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
