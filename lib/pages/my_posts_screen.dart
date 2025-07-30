@@ -1,36 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lostandfound/components/PostedItemsList.dart';
 
-class MyPostsScreen extends StatelessWidget {
+class MyPostsScreen extends StatefulWidget {
   const MyPostsScreen({super.key});
 
-  final List<Map<String, dynamic>> myItems = const [
-    {
-      'title': 'Lost Headphones',
-      'type': 'Lost',
-      'train': '12951 / Rajdhani Express',
-      'date': '20 July 2025',
-      'status': 'Open',
-      'category': 'Electronics',
-      'name': 'Person XYZ',
-      'email': 'xyz@example.com',
-      'phone': '+91 9876543210',
-    },
-    {
-      'title': 'Found Wallet',
-      'type': 'Found',
-      'train': '12234 / Duronto',
-      'date': '18 July 2025',
-      'status': 'Claimed',
-      'category': 'Wallet',
-      'name': 'Person XYZ',
-      'email': 'xyz@example.com',
-      'phone': '+91 9876543210',
-    },
-  ];
+  @override
+  State<MyPostsScreen> createState() => _MyPostsScreenState();
+}
+
+class _MyPostsScreenState extends State<MyPostsScreen> with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOut,
+    ));
+
+    _fadeController.forward();
+    _slideController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final personalInfo = myItems.isNotEmpty ? myItems.first : null;
+    final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -43,39 +68,40 @@ class MyPostsScreen extends StatelessWidget {
         elevation: 4,
         centerTitle: true,
       ),
-      body: myItems.isEmpty
-          ? const Center(
-              child: Text(
-                "You haven’t posted any items yet.",
-                style: TextStyle(fontSize: 16, color: Colors.black54),
-              ),
-            )
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                if (personalInfo != null) ...[
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 4,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    child: Padding(
+      body: user == null
+          ? const Center(child: Text("User not logged in."))
+          : FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Column(
+                  children: [
+                    Container(
                       padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const CircleAvatar(
                             radius: 30,
-                            backgroundColor: Colors.blue, // Your primary color
+                            backgroundColor: Colors.blue,
                             child: Icon(
-                              Icons
-                                  .person, // You can change this to any other icon
+                              Icons.person,
                               size: 30,
                               color: Colors.white,
                             ),
                           ),
-
                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(
@@ -90,142 +116,38 @@ class MyPostsScreen extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                Text("Name: ${personalInfo['name']}"),
-                                Text("Email: ${personalInfo['email']}"),
-                                Text("Phone: ${personalInfo['phone']}"),
+                                Text("Name: ${user.displayName ?? 'N/A'}"),
+                                Text("Email: ${user.email ?? 'N/A'}"),
+                                Text("UID: ${user.uid}"),
                               ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      "My Posted Items",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "My Posted Items",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-                ...myItems.map(
-                  (item) => Card(
-                    elevation: 5,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                item['type'] == 'Lost'
-                                    ? Icons.sentiment_dissatisfied
-                                    : Icons.sentiment_satisfied_alt,
-                                color: item['type'] == 'Lost'
-                                    ? Colors.red
-                                    : Colors.green,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                "${item['type']} Item",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            item['title'],
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.train,
-                                size: 18,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  item['train'],
-                                  style: const TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            "Date: ${item['date']}",
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          Text(
-                            "Category: ${item['category']}",
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Chip(
-                                label: Text(
-                                  item['status'],
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                backgroundColor: item['status'] == 'Open'
-                                    ? Colors.orange[100]
-                                    : Colors.green[100],
-                              ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      color: Colors.blue,
-                                    ),
-                                    onPressed: () {
-                                      // TODO: Edit logic
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () {
-                                      // TODO: Delete logic
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
+                    Expanded(
+                      child: FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: PostedItemsList(uid: user.uid),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -242,11 +164,14 @@ class MyPostsScreen extends StatelessWidget {
                     child: const Text('Cancel'),
                   ),
                   TextButton(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.of(ctx).pop();
-                      Navigator.of(context).pushReplacementNamed('/login');
+                      await FirebaseAuth.instance.signOut();
                     },
-                    child: const Text('Logout'),
+                    child: const Text(
+                      'Logout',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
                 ],
               ),
