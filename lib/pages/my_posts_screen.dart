@@ -90,38 +90,51 @@ class _MyPostsScreenState extends State<MyPostsScreen> with TickerProviderStateM
                           ),
                         ],
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const CircleAvatar(
-                            radius: 30,
-                            backgroundColor: Color.fromARGB(255, 225, 224, 253),
-                            child: Icon(
-                              Icons.person,
-                              size: 30,
-                              color: Colors.white,
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Left Side Image (same height as right content)
+                            Container(
+                              width: 80,
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 225, 224, 253),
+                                borderRadius: BorderRadius.circular(12),
+                                image: user.photoURL != null
+                                    ? DecorationImage(
+                                        image: NetworkImage(user.photoURL!),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
+                              ),
+                              child: user.photoURL == null
+                                  ? const Icon(Icons.person,
+                                      size: 40, color: Colors.white)
+                                  : null,
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Personal Details",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: Color.fromRGBO(66, 60, 109, 1),
+                            const SizedBox(width: 16),
+
+                            // Right Side Content
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Personal Details",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: Color.fromRGBO(66, 60, 109, 1),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text("Name: ${user.displayName ?? 'N/A'}"),
-                                Text("Email: ${user.email ?? 'N/A'}"),
-                              ],
+                                  const SizedBox(height: 8),
+                                  Text("Name: ${user.displayName ?? 'N/A'}"),
+                                  Text("Email: ${user.email ?? 'N/A'}"),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     const Padding(

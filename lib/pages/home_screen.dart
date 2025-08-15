@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   "Welcome To Indian Railways",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: 28,
+                                    fontSize: 24,
                                     color: Colors.white,
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               const Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 12.0),
                                 child: Text(
-                                  "What you lost, we will find.",
+                                  "What you lost,\n we will find.",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 18,
@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 child: Container(
                   width: double.infinity,
-                  height: 90,
+                  height: 70,
                   margin:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(
@@ -197,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 child: Container(
                   width: double.infinity,
-                  height: 90,
+                  height: 70,
                   margin:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(

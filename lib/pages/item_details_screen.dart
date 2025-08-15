@@ -15,14 +15,11 @@ class ItemDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Colors.blue[700];
-    final accentColor = Colors.amber[400];
-
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text('Item Details'),
-        backgroundColor: Color.fromARGB(255, 101, 101, 196),
+        backgroundColor: const Color.fromARGB(255, 101, 101, 196),
         foregroundColor: Colors.white,
         elevation: 3,
       ),
@@ -31,7 +28,7 @@ class ItemDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Preview
+            // 📸 Image Preview
             Material(
               elevation: 3,
               borderRadius: BorderRadius.circular(20),
@@ -57,7 +54,7 @@ class ItemDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Info Card
+            // 📋 Info Card
             Card(
               elevation: 6,
               shadowColor: Colors.black26,
@@ -72,20 +69,67 @@ class ItemDetailsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Title
                     Text(
                       itemData['title'] ?? 'Unknown Item',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Color.fromARGB(255, 101, 101, 196),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    infoRow('Status', itemData['status'] ?? '-'),
+                    const SizedBox(height: 16),
+
+                    // 🔥 Highlighted Type (Lost / Found)
+                    Row(
+                      children: [
+                        const Text(
+                          'Type: ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: (itemData['type'] == 'Found')
+                                ? Colors.green.shade100
+                                : Colors.red.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            itemData['type'] ?? '-',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: (itemData['type'] == 'Found')
+                                  ? Colors.green[800]
+                                  : Colors.red[800],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Other Details
+                    // infoRow('Status', itemData['status'] ?? '-'),
                     infoRow('Date', itemData['date'] ?? '-'),
+                    infoRow('Category', itemData['category'] ?? '-'),
+                    infoRow('Train No', itemData['trainNumber'] ?? '-'),
+                    infoRow('Station', itemData['station'] ?? '-'),
+                    infoRow('Posted By', itemData['postedBy'] ?? '-'),
+
                     const SizedBox(height: 16),
                     Divider(color: Colors.grey[300]),
                     const SizedBox(height: 12),
+
+                    // Description
                     Text(
                       'Description',
                       style: TextStyle(
@@ -110,7 +154,7 @@ class ItemDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 36),
 
-            // Contact Button
+            // 📩 Contact Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -139,7 +183,7 @@ class ItemDetailsScreen extends StatelessWidget {
                         context,
                         email,
                         finderUid,
-                        docId, // use docId
+                        docId,
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -148,14 +192,15 @@ class ItemDetailsScreen extends StatelessWidget {
                     }
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Failed to fetch contact info.')),
+                      const SnackBar(
+                          content: Text('Failed to fetch contact info.')),
                     );
                   }
                 },
                 icon: const Icon(Icons.mail_outline),
                 label: const Text('Contact Poster'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 101, 101, 196),
+                  backgroundColor: const Color.fromARGB(255, 101, 101, 196),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   textStyle: const TextStyle(
@@ -166,7 +211,7 @@ class ItemDetailsScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
                   elevation: 6,
-                  shadowColor: Color.fromARGB(255, 101, 101, 196),
+                  shadowColor: const Color.fromARGB(255, 101, 101, 196),
                 ),
               ),
             ),
@@ -197,6 +242,7 @@ class ItemDetailsScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "$title: ",
@@ -206,7 +252,7 @@ class ItemDetailsScreen extends StatelessWidget {
             child: Text(
               value,
               style: const TextStyle(fontSize: 15),
-              overflow: TextOverflow.ellipsis,
+              softWrap: true,
             ),
           ),
         ],

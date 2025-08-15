@@ -106,20 +106,20 @@ class PostedItemsList extends StatelessWidget {
                           const SizedBox(height: 4),
 
                           /// Status
-                          Chip(
-                            label: Text(
-                              item['status'] ?? '',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            backgroundColor: item['status'] == 'Open'
-                                ? Colors.orange.shade100
-                                : Colors.green.shade100,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            visualDensity: VisualDensity.compact,
-                          ),
+                          // Chip(
+                          //   label: Text(
+                          //     item['status'] ?? '',
+                          //     style: const TextStyle(
+                          //       fontSize: 12,
+                          //       fontWeight: FontWeight.w500,
+                          //     ),
+                          //   ),
+                          //   backgroundColor: item['status'] == 'Open'
+                          //       ? Colors.orange.shade100
+                          //       : Colors.green.shade100,
+                          //   padding: const EdgeInsets.symmetric(horizontal: 8),
+                          //   visualDensity: VisualDensity.compact,
+                          // ),
                         ],
                       ),
                     ),

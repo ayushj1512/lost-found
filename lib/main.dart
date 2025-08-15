@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
         useMaterial3: true,
-        textTheme: GoogleFonts.poppinsTextTheme(),
+        textTheme: GoogleFonts.ralewayTextTheme(),
         scaffoldBackgroundColor: const Color(0xFFF7F6FB),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)
             .copyWith(
