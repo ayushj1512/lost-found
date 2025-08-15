@@ -234,16 +234,7 @@ class _FoundScreenState extends State<FoundScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const PostItemScreen()),
-          );
-        },
-        backgroundColor: const Color(0xFFBBDEFB),
-        child: const Icon(Icons.add, color: Colors.black),
-      ),
+      
     );
   }
 }

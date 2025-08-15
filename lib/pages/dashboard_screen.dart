@@ -39,7 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         elevation: 10,
         color: Colors.white,
         child: SizedBox(
-          height: 70,
+          height: 75, // extra space for better alignment
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -72,7 +72,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
               ),
-              const SizedBox(width: 48), // Space for FAB
+              const SizedBox(width: 48), // Space for center FAB
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -90,7 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       size: 28,
                     ),
                     Text(
-                      'Profile',
+                      'My Posts',
                       style: TextStyle(
                         color: _selectedIndex == 1
                             ? const Color.fromARGB(255, 63, 56, 152)
@@ -106,14 +106,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color.fromARGB(255, 224, 212, 255),
-        elevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        onPressed: _openPostItemScreen,
-        child: const Icon(Icons.add, color: Colors.black, size: 30),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            backgroundColor: const Color.fromARGB(255, 224, 212, 255),
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            onPressed: _openPostItemScreen,
+            child: const Icon(Icons.add, color: Colors.black, size: 30),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            "Post Item",
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
