@@ -15,7 +15,7 @@ class LostScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2196F3),
+        backgroundColor: const Color.fromRGBO(179, 168, 250, 1),
         elevation: 1,
         title: const Text(
           'Lost Items',
@@ -46,159 +46,131 @@ class LostScreen extends StatelessWidget {
 
           final items = snapshot.data!.docs;
 
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          return GridView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              // Make the card a bit taller so image can dominate visually
+              childAspectRatio: 0.68,
+            ),
             itemCount: items.length,
             itemBuilder: (context, index) {
-              final item = items[index].data() as Map<String, dynamic>;
+              final item = items[index].data() as Map<String, dynamic>? ?? {};
 
-              return TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: 1),
-                duration: Duration(milliseconds: 500 + index * 100),
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: child,
-                    ),
-                  );
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade300,
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
+              return Padding(
+                // OUTER padding around the entire card (top/bottom/left/right)
+                padding: const EdgeInsets.all(8.0),
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.white,
+                  clipBehavior: Clip.hardEdge,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ItemDetailsScreen(
+                            itemData: item,
+                            docId: items[index].id,
+                          ),
+                        ),
+                      );
+                    },
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (item['photoUrl'] != null &&
-                            item['photoUrl'].toString().isNotEmpty)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              item['photoUrl'],
-                              height: 180,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        const SizedBox(height: 12),
-
-                        Text(
-                          "Name: ${item['title'] ?? 'Unknown'}",
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-
-                        if (item['color'] != null)
-                          Text(
-                            "Color: ${item['color']}",
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        const SizedBox(height: 8),
-
-                        Text(
-                          item['description'] ?? 'No description provided.',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.calendar_today,
-                              size: 16,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              "Date: ${item['date'] ?? 'Unknown'}",
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            if (item['status'] != null &&
-                                item['status'].toString().isNotEmpty)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.orange.shade600,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.orange.shade100,
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
+                        // Image area (takes majority of the card)
+                        Expanded(
+                          flex: 6,
+                          child: Container(
+                            // INNER padding so image doesn't touch rounded corners
+                            padding: const EdgeInsets.all(8),
+                            color: Colors.white,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: item['photoUrl'] != null &&
+                                      item['photoUrl'].toString().isNotEmpty
+                                  ? Image.network(
+                                      item['photoUrl'],
+                                      fit: BoxFit.contain, // show full image
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      alignment: Alignment.center,
+                                      // Gracefully handle load errors
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return const Center(
+                                          child: Icon(Icons.broken_image,
+                                              size: 36, color: Colors.grey),
+                                        );
+                                      },
+                                    )
+                                  : const Center(
+                                      child: Icon(Icons.image_not_supported,
+                                          size: 36, color: Colors.grey),
                                     ),
+                            ),
+                          ),
+                        ),
+
+                        // Text / meta area (smaller)
+                        Expanded(
+                          flex: 4,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  (item['title'] ?? 'Unknown').toString(),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                if (item['color'] != null &&
+                                    item['color'].toString().isNotEmpty)
+                                  Text(
+                                    "Color: ${item['color']}",
+                                    style: const TextStyle(
+                                        color: Color.fromARGB(255, 229, 222, 249), fontSize: 13),
+                                  ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  (item['description'] ?? 'No description provided.')
+                                      .toString(),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 13, color: Colors.black87),
+                                ),
+                                const Spacer(),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.calendar_today,
+                                        size: 14, color: Colors.grey),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        (item['date'] ?? 'Unknown').toString(),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style:
+                                            const TextStyle(fontSize: 12, color: Colors.black54),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
                                   ],
                                 ),
-                                child: Text(
-                                  item['status'],
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ItemDetailsScreen(
-  itemData: item,
-  docId: items[index].id, // 👈 pass document ID from snapshot
-),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.info_outline),
-                              label: const Text('Details'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2196F3),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 12,
-                                ),
-                                elevation: 3,
-                              ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
@@ -211,9 +183,12 @@ class LostScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> PostItemScreen()));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => PostItemScreen()),
+          );
         },
-        backgroundColor: const Color(0xFF2196F3),
+        backgroundColor: const Color.fromARGB(255, 126, 97, 255),
         child: const Icon(Icons.add, color: Colors.white),
         elevation: 5,
       ),

@@ -22,7 +22,7 @@ class ItemDetailsScreen extends StatelessWidget {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text('Item Details'),
-        backgroundColor: primaryColor,
+        backgroundColor: Color.fromARGB(255, 101, 101, 196),
         foregroundColor: Colors.white,
         elevation: 3,
       ),
@@ -77,7 +77,7 @@ class ItemDetailsScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: primaryColor,
+                        color: Color.fromARGB(255, 101, 101, 196),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -155,7 +155,7 @@ class ItemDetailsScreen extends StatelessWidget {
                 icon: const Icon(Icons.mail_outline),
                 label: const Text('Contact Poster'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
+                  backgroundColor: Color.fromARGB(255, 101, 101, 196),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   textStyle: const TextStyle(
@@ -166,7 +166,7 @@ class ItemDetailsScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
                   elevation: 6,
-                  shadowColor: accentColor,
+                  shadowColor: Color.fromARGB(255, 101, 101, 196),
                 ),
               ),
             ),

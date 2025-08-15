@@ -12,6 +12,9 @@ android {
     namespace = "com.example.lostandfound"
     compileSdk = flutter.compileSdkVersion
 
+    // ✅ Added NDK version to fix missing source.properties issue
+    ndkVersion = "26.1.10909125" // Change if you install a different version
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

@@ -1,3 +1,5 @@
+// Add this import for icons (already have SVG for logo)
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -57,47 +59,61 @@ class _HomeScreenState extends State<HomeScreen> {
                   ClipPath(
                     clipper: WaveClipper(),
                     child: Container(
-                      height: 300,
+                      height: 380, // Increased header height
                       width: double.infinity,
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Color(0xFF2196F3), Color(0xFF26C6DA)],
+                          colors: [
+                            Color.fromARGB(255, 84, 99, 218),
+                            Color.fromARGB(255, 101, 101, 196)
+                          ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),
                       ),
-                      child: const SafeArea(
+                      child: SafeArea(
                         child: Padding(
-                          padding: EdgeInsets.all(24),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 40), // More vertical padding
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Spacer(),
-                              Text(
-                                "Welcome To Mila kya?",
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
+                              SvgPicture.network(
+                                'https://upload.wikimedia.org/wikipedia/en/8/83/Indian_Railways.svg',
+                                height: 80,
+                              ),
+                              const SizedBox(height: 25),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(
+                                  "Welcome To Indian Railways",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                  ),
                                 ),
                               ),
-                              SizedBox(height: 8),
-                              Text(
-                                "What you lost, we will find.",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white70,
+                              const SizedBox(height: 20),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                                child: Text(
+                                  "What you lost, we will find.",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white70,
+                                  ),
                                 ),
                               ),
-                              Spacer(),
                             ],
                           ),
                         ),
                       ),
                     ),
                   ),
-
-                  // 🔔 Chat icon with badge (no number)
                   Positioned(
                     top: 20,
                     right: 16,
@@ -135,52 +151,73 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 40),
 
-              // 🟥 Red message if there are unread chats
-              
-              const SizedBox(height: 20),
+              // Lost Items (Rectangle)
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LostScreen()),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 90,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 209, 9, 9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.search, color: Colors.white, size: 30),
+                      SizedBox(width: 12),
+                      Text(
+                        "Lost Items",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
-              // 🔘 Buttons
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LostScreen()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+              // Found Items (Rectangle)
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const FoundScreen()),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 90,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 33, 186, 33),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.check_circle, color: Colors.white, size: 30),
+                      SizedBox(width: 12),
+                      Text(
+                        "Found Items",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold),
                       ),
-                      child: const Text("Lost Items",
-                          style: TextStyle(fontSize: 16, color: Colors.white)),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const FoundScreen()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF2196F3),
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text("Found Items",
-                          style: TextStyle(fontSize: 16, color: Colors.white)),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -195,11 +232,11 @@ class WaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
-    path.lineTo(0, size.height - 60);
-    final firstControlPoint = Offset(size.width / 2, size.height);
-    final firstEndPoint = Offset(size.width, size.height - 60);
-    path.quadraticBezierTo(
-        firstControlPoint.dx, firstControlPoint.dy, firstEndPoint.dx, firstEndPoint.dy);
+    path.lineTo(0, size.height - 80); // Curve start
+    final firstControlPoint = Offset(size.width / 2, size.height + 60); // Deeper curve
+    final firstEndPoint = Offset(size.width, size.height - 80);
+    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
+        firstEndPoint.dx, firstEndPoint.dy);
     path.lineTo(size.width, 0);
     path.close();
     return path;

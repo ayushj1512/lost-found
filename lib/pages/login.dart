@@ -96,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen>
                 height: 220,
                 width: double.infinity,
                 decoration: const BoxDecoration(
-                  color: Colors.blue,
+                  color: Color.fromARGB(255, 101, 101, 196),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(50),
                     bottomRight: Radius.circular(50),
@@ -210,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen>
                         onPressed: () {},
                         child: const Text(
                           'Forgot Password? Click',
-                          style: TextStyle(color: Colors.blue),
+                          style: TextStyle(color: Color.fromARGB(255, 101, 101, 196)),
                         ),
                       ),
                     ),
@@ -222,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen>
                       child: ElevatedButton(
                         onPressed: isLoading ? null : _loginUser,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: const Color.fromARGB(255, 101, 101, 196),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
@@ -258,7 +258,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 setState(() => isGoogleLoading = false);
                               },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue, // primary blue color
+                          backgroundColor: const Color.fromARGB(255, 101, 101, 196), // primary blue color
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),

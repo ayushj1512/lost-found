@@ -64,7 +64,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> with TickerProviderStateM
           "My Posts",
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color.fromARGB(255, 101, 101, 196),
         elevation: 4,
         centerTitle: true,
       ),
@@ -95,7 +95,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> with TickerProviderStateM
                         children: [
                           const CircleAvatar(
                             radius: 30,
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Color.fromARGB(255, 225, 224, 253),
                             child: Icon(
                               Icons.person,
                               size: 30,
@@ -112,13 +112,12 @@ class _MyPostsScreenState extends State<MyPostsScreen> with TickerProviderStateM
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,
-                                    color: Colors.black87,
+                                    color: Color.fromRGBO(66, 60, 109, 1),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text("Name: ${user.displayName ?? 'N/A'}"),
                                 Text("Email: ${user.email ?? 'N/A'}"),
-                                Text("UID: ${user.uid}"),
                               ],
                             ),
                           ),
@@ -134,7 +133,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> with TickerProviderStateM
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Color.fromARGB(255, 101, 101, 196),
                           ),
                         ),
                       ),
@@ -170,7 +169,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> with TickerProviderStateM
                     },
                     child: const Text(
                       'Logout',
-                      style: TextStyle(color: Colors.red),
+                      style: TextStyle(color: Color.fromARGB(255, 209, 9, 9)),
                     ),
                   ),
                 ],
@@ -180,7 +179,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> with TickerProviderStateM
           icon: const Icon(Icons.logout),
           label: const Text('Logout'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.redAccent,
+            backgroundColor: const Color.fromARGB(255, 209, 9, 9),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(

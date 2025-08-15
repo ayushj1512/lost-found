@@ -39,45 +39,75 @@ class _DashboardScreenState extends State<DashboardScreen> {
         elevation: 10,
         color: Colors.white,
         child: SizedBox(
-          height: 60,
+          height: 70,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(
-                icon: Icon(
-                  Icons.home,
-                  color: _selectedIndex == 0
-                      ? const Color(0xFF1565C0)
-                      : Colors.grey.shade500,
-                  size: 28,
-                ),
-                onPressed: () {
+              GestureDetector(
+                onTap: () {
                   setState(() {
                     _selectedIndex = 0;
                   });
                 },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.home,
+                      color: _selectedIndex == 0
+                          ? const Color.fromARGB(255, 63, 56, 152)
+                          : Colors.grey.shade500,
+                      size: 28,
+                    ),
+                    Text(
+                      'Home',
+                      style: TextStyle(
+                        color: _selectedIndex == 0
+                            ? const Color.fromARGB(255, 63, 56, 152)
+                            : Colors.grey.shade500,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(width: 48), // Space for FAB
-              IconButton(
-                icon: Icon(
-                  Icons.person_outline,
-                  color: _selectedIndex == 1
-                      ? const Color(0xFF1565C0)
-                      : Colors.grey.shade500,
-                  size: 28,
-                ),
-                onPressed: () {
+              GestureDetector(
+                onTap: () {
                   setState(() {
                     _selectedIndex = 1;
                   });
                 },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.person_outline,
+                      color: _selectedIndex == 1
+                          ? const Color.fromARGB(255, 63, 56, 152)
+                          : Colors.grey.shade500,
+                      size: 28,
+                    ),
+                    Text(
+                      'Profile',
+                      style: TextStyle(
+                        color: _selectedIndex == 1
+                            ? const Color.fromARGB(255, 63, 56, 152)
+                            : Colors.grey.shade500,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFFFEB3B), // Yellow accent
+        backgroundColor: const Color.fromARGB(255, 224, 212, 255),
         elevation: 8,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

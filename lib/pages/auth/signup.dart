@@ -160,7 +160,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                       height: 220,
                       width: double.infinity,
                       decoration: const BoxDecoration(
-                        color: Colors.blue,
+                        color: Color.fromARGB(255, 101, 101, 196),
                         borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(50),
                           bottomRight: Radius.circular(50),
@@ -247,7 +247,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                             child: ElevatedButton(
                               onPressed: _signUp,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
+                                backgroundColor: Color.fromARGB(255, 101, 101, 196),
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
                                 ),

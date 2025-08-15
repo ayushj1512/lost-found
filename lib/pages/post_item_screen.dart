@@ -127,7 +127,7 @@ class _PostItemScreenState extends State<PostItemScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Item Posted Successfully!'),
-        backgroundColor: Color(0xFF1565C0),
+        backgroundColor: Color.fromARGB(255, 101, 101, 196),
       ),
     );
     titleController.clear();
@@ -147,7 +147,7 @@ class _PostItemScreenState extends State<PostItemScreen> {
       backgroundColor: const Color(0xFFF4F6F8),
       appBar: AppBar(
         title: const Text('Post an Item'),
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color.fromARGB(255, 101, 101, 196),
         foregroundColor: Colors.white,
         centerTitle: true,
       ),
@@ -245,8 +245,8 @@ class _PostItemScreenState extends State<PostItemScreen> {
                 child: ElevatedButton.icon(
                   onPressed: isUploading ? null : _submitItem,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFEB3B),
-                    foregroundColor: Colors.black,
+                    backgroundColor: const Color.fromARGB(255, 101, 101, 196),
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -274,7 +274,7 @@ class _PostItemScreenState extends State<PostItemScreen> {
       labelText: label,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Color(0xFF1565C0), width: 2),
+        borderSide: const BorderSide(color: Colors.black, width: 2),
         borderRadius: BorderRadius.circular(10),
       ),
     );

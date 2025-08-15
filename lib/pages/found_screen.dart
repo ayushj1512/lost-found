@@ -15,7 +15,7 @@ class FoundScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2196F3),
+        backgroundColor: const Color.fromRGBO(179, 168, 250, 1),
         elevation: 0,
         centerTitle: true,
         title: const Text('Found Items', style: TextStyle(color: Colors.white)),
@@ -41,9 +41,8 @@ class FoundScreen extends StatelessWidget {
               final doc = items[index];
               final item = doc.data() as Map<String, dynamic>;
 
-              // Injecting doc ID and uid into itemData
               item['id'] = doc.id;
-              item['uid'] = item['uid'] ?? ''; // Ensure uid is present
+              item['uid'] = item['uid'] ?? '';
 
               return Card(
                 elevation: 6,
@@ -51,104 +50,138 @@ class FoundScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 margin: const EdgeInsets.only(bottom: 20),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Title: ${item['title'] ?? 'Unknown'}",
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Category: ${item['category'] ?? '-'}",
-                        style: const TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Train No: ${item['trainNumber'] ?? '-'}",
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Station: ${item['station'] ?? '-'}",
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Posted By: ${item['postedBy'] ?? 'Unknown'}",
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Date: ${item['date'] ?? '-'}",
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item['description'] ?? 'No description provided.',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      const SizedBox(height: 12),
-                      if ((item['status'] ?? '').toString().isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            item['status'],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 📸 Render image from photoUrl
+                    if (item['photoUrl'] != null &&
+                        item['photoUrl'].toString().isNotEmpty)
+                      ClipRRect(
+                        borderRadius:
+                            const BorderRadius.vertical(top: Radius.circular(20)),
+                        child: Image.network(
+                          item['photoUrl'],
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            height: 180,
+                            color: Colors.grey[300],
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.broken_image,
+                                size: 50, color: Colors.grey),
                           ),
                         ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      ),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              // Implement match logic here
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.blue,
-                              side: const BorderSide(color: Colors.blue),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text('Match Item'),
+                          Text(
+                            "Title: ${item['title'] ?? 'Unknown'}",
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w600),
                           ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                 builder: (_) => ItemDetailsScreen(
-  itemData: item,
-  docId: items[index].id, // 👈 pass document ID from snapshot
-),
+                          const SizedBox(height: 6),
+                          Text(
+                            "Category: ${item['category'] ?? '-'}",
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "Train No: ${item['trainNumber'] ?? '-'}",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "Station: ${item['station'] ?? '-'}",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "Posted By: ${item['postedBy'] ?? 'Unknown'}",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "Date: ${item['date'] ?? '-'}",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            item['description'] ??
+                                'No description provided.',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 12),
+                          if ((item['status'] ?? '').toString().isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color:
+                                    const Color.fromARGB(255, 28, 184, 0),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                item['status'],
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2196F3),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text('Details'),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  // Implement match logic here
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                                  foregroundColor: const Color.fromRGBO(179, 168, 250, 1),
+                                  side: const BorderSide(
+                                      color: Color.fromARGB(255, 101, 101, 196)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text('Match Item'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ItemDetailsScreen(
+                                        itemData: item,
+                                        docId: items[index].id,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromARGB(
+                                      255, 101, 101, 196),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text('Details'),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               );
             },
