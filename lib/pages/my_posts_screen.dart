@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lostandfound/components/PostedItemsList.dart';
+import 'package:lostandfound/pages/auth/login.dart';
+import 'package:lostandfound/pages/auth/signup.dart';
 
 class MyPostsScreen extends StatefulWidget {
   const MyPostsScreen({super.key});
@@ -176,15 +178,22 @@ class _MyPostsScreenState extends State<MyPostsScreen> with TickerProviderStateM
                     child: const Text('Cancel'),
                   ),
                   TextButton(
-                    onPressed: () async {
-                      Navigator.of(ctx).pop();
-                      await FirebaseAuth.instance.signOut();
-                    },
-                    child: const Text(
-                      'Logout',
-                      style: TextStyle(color: Color.fromARGB(255, 209, 9, 9)),
-                    ),
-                  ),
+  onPressed: () async {
+    Navigator.of(ctx).pop(); // Close the dialog
+    await FirebaseAuth.instance.signOut(); // Sign out
+
+    // Navigate to SignUpScreen and remove all previous screens
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (route) => false,
+    );
+  },
+  child: const Text(
+    'Logout',
+    style: TextStyle(color: Color.fromARGB(255, 209, 9, 9)),
+  ),
+),
+
                 ],
               ),
             );

@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lostandfound/components/google_sign_in_button.dart';
 import 'package:lostandfound/pages/dashboard_screen.dart';
-import 'package:lostandfound/pages/login.dart';
+import 'package:lostandfound/pages/auth/login.dart';
 import 'package:lostandfound/utils/firestore.dart'; // <-- Added import
 
 class SignUpScreen extends StatefulWidget {
@@ -241,13 +241,36 @@ class _SignUpScreenState extends State<SignUpScreen>
                             controller: confirmPasswordController,
                             obscure: true,
                           ),
+                          SizedBox(height: 12,),
+                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text("Already have an account? "),
+                              GestureDetector(
+                                onTap: () => Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const LoginScreen(),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Sign in',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 24),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: _signUp,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color.fromARGB(255, 101, 101, 196),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 101, 101, 196),
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
                                 ),
@@ -264,39 +287,18 @@ class _SignUpScreenState extends State<SignUpScreen>
                               ),
                             ),
                           ),
+                          
                           const SizedBox(height: 20),
                           const Text('or continue with'),
                           const SizedBox(height: 16),
                           GoogleSignInButton(
-                            isLoading: isLoading,
+                            isLoading: isGoogleLoading,
                             onPressed: () async {
-                              setState(() => isGoogleLoading = true);
                               await _signInWithGoogle();
-                              setState(() => isGoogleLoading = false);
                             },
                           ),
                           const SizedBox(height: 24),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text("Already have an account? "),
-                              GestureDetector(
-                                onTap: () => Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const LoginScreen(),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Login',
-                                  style: TextStyle(
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                         
                           const SizedBox(height: 30),
                         ],
                       ),

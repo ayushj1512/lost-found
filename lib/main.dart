@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'firebase_options.dart';
 import 'package:lostandfound/pages/dashboard_screen.dart';
-import 'package:lostandfound/pages/login.dart';
+import 'package:lostandfound/pages/auth/login.dart';
 import 'package:lostandfound/pages/my_posts_screen.dart';
 import 'package:lostandfound/pages/post_item_screen.dart';
 import 'package:lostandfound/pages/auth/signup.dart';

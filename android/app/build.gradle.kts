@@ -13,7 +13,7 @@ android {
     compileSdk = flutter.compileSdkVersion
 
     // ✅ Added NDK version to fix missing source.properties issue
-    ndkVersion = "26.1.10909125" // Change if you install a different version
+    ndkVersion = "27.0.12077973" // Change if you install a different version
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

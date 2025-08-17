@@ -90,7 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       size: 28,
                     ),
                     Text(
-                      'My Posts',
+                      'My Posts ',
                       style: TextStyle(
                         color: _selectedIndex == 1
                             ? const Color.fromARGB(255, 63, 56, 152)

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lostandfound/pages/item_details_screen.dart';
 import 'package:lostandfound/pages/post_item_screen.dart';
 
@@ -13,6 +14,7 @@ class LostScreen extends StatefulWidget {
 class _LostScreenState extends State<LostScreen> {
   String searchQuery = "";
   String sortBy = "date"; // default sorting
+  DateTime? _selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +40,7 @@ class _LostScreenState extends State<LostScreen> {
       ),
       body: Column(
         children: [
-          // 🔍 Search + Sort Row
+          // 🔍 Search + Sort + Calendar Row
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -79,6 +81,24 @@ class _LostScreenState extends State<LostScreen> {
                     });
                   },
                 ),
+                const SizedBox(width: 10),
+                // Calendar Button
+                IconButton(
+                  icon: const Icon(Icons.calendar_today, color: Colors.black54),
+                  onPressed: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate ?? DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now(),
+                    );
+                    if (pickedDate != null) {
+                      setState(() {
+                        _selectedDate = pickedDate;
+                      });
+                    }
+                  },
+                ),
               ],
             ),
           ),
@@ -96,12 +116,33 @@ class _LostScreenState extends State<LostScreen> {
                   return const Center(child: Text("No lost items available."));
                 }
 
+                final now = DateTime.now();
+                final sevenDaysAgo = now.subtract(const Duration(days: 7));
+
                 final items = snapshot.data!.docs.where((doc) {
                   final data = doc.data() as Map<String, dynamic>;
                   final title = (data['title'] ?? "").toString().toLowerCase();
-                  final desc =
-                      (data['description'] ?? "").toString().toLowerCase();
-                  return title.contains(searchQuery) || desc.contains(searchQuery);
+                  final desc = (data['description'] ?? "").toString().toLowerCase();
+
+                  // Check date
+                  final itemDateString = data['date'] ?? '';
+                  DateTime? itemDate;
+                  try {
+                    itemDate = DateFormat('yyyy-MM-dd').parse(itemDateString);
+                  } catch (_) {
+                    itemDate = null;
+                  }
+
+                  final dateMatch = _selectedDate != null
+                      ? itemDate != null &&
+                          itemDate.year == _selectedDate!.year &&
+                          itemDate.month == _selectedDate!.month &&
+                          itemDate.day == _selectedDate!.day
+                      : itemDate != null && itemDate.isAfter(sevenDaysAgo);
+
+                  final searchMatch = title.contains(searchQuery) || desc.contains(searchQuery);
+
+                  return dateMatch && searchMatch;
                 }).toList();
 
                 if (items.isEmpty) {
@@ -117,6 +158,15 @@ class _LostScreenState extends State<LostScreen> {
 
                     item['id'] = doc.id;
                     item['uid'] = item['uid'] ?? '';
+
+                    // Format date
+                    String formattedDate = '-';
+                    if (item['date'] != null && item['date'].toString().isNotEmpty) {
+                      try {
+                        final dt = DateFormat('yyyy-MM-dd').parse(item['date']);
+                        formattedDate = DateFormat('dd MMM yyyy').format(dt);
+                      } catch (_) {}
+                    }
 
                     return InkWell(
                       onTap: () {
@@ -141,7 +191,6 @@ class _LostScreenState extends State<LostScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // 📸 Circular Image on Left
                               if (item['photoUrl'] != null &&
                                   item['photoUrl'].toString().isNotEmpty)
                                 CircleAvatar(
@@ -157,10 +206,7 @@ class _LostScreenState extends State<LostScreen> {
                                   child: const Icon(Icons.image_not_supported,
                                       size: 40, color: Colors.grey),
                                 ),
-
                               const SizedBox(width: 16),
-
-                              // 📝 Details on Right
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +233,7 @@ class _LostScreenState extends State<LostScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      "Date: ${item['date'] ?? '-'}",
+                                      "Date: $formattedDate",
                                       style: const TextStyle(fontSize: 13),
                                     ),
                                   ],
@@ -205,7 +251,6 @@ class _LostScreenState extends State<LostScreen> {
           ),
         ],
       ),
-     
     );
   }
 }

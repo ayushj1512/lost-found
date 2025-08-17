@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:lostandfound/components/google_sign_in_button.dart';
 import 'package:lostandfound/pages/dashboard_screen.dart';
-import 'auth/signup.dart';
+import 'signup.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -210,7 +211,9 @@ class _LoginScreenState extends State<LoginScreen>
                         onPressed: () {},
                         child: const Text(
                           'Forgot Password? Click',
-                          style: TextStyle(color: Color.fromARGB(255, 101, 101, 196)),
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 101, 101, 196),
+                          ),
                         ),
                       ),
                     ),
@@ -222,7 +225,12 @@ class _LoginScreenState extends State<LoginScreen>
                       child: ElevatedButton(
                         onPressed: isLoading ? null : _loginUser,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 101, 101, 196),
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            101,
+                            101,
+                            196,
+                          ),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
@@ -247,42 +255,11 @@ class _LoginScreenState extends State<LoginScreen>
                     const SizedBox(height: 16),
 
                     // Google Sign In
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: isGoogleLoading
-                            ? null
-                            : () async {
-                                setState(() => isGoogleLoading = true);
-                                await _signInWithGoogle();
-                                setState(() => isGoogleLoading = false);
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 101, 101, 196), // primary blue color
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          elevation: 4,
-                        ),
-                        child: isGoogleLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    'Continue with Google',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                      ),
+                    GoogleSignInButton(
+                      isLoading: isGoogleLoading,
+                      onPressed: () async {
+                        await _signInWithGoogle();
+                      },
                     ),
                     const SizedBox(height: 24),
 

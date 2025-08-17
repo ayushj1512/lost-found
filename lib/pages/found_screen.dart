@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lostandfound/pages/item_details_screen.dart';
 import 'package:lostandfound/pages/post_item_screen.dart';
 
@@ -14,6 +15,7 @@ class _FoundScreenState extends State<FoundScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
   String _sortBy = "Date"; // Default sort option
+  DateTime? _selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class _FoundScreenState extends State<FoundScreen> {
       ),
       body: Column(
         children: [
-          // 🔍 Search Bar + 🔽 Sort By
+          // 🔍 Search Bar + 🔽 Sort By + 📅 Date Picker
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
@@ -54,8 +56,8 @@ class _FoundScreenState extends State<FoundScreen> {
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 0, horizontal: 16),
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                         borderSide: BorderSide.none,
@@ -78,6 +80,24 @@ class _FoundScreenState extends State<FoundScreen> {
                     });
                   },
                 ),
+                const SizedBox(width: 12),
+                // Calendar Button
+                IconButton(
+                  icon: const Icon(Icons.calendar_today, color: Colors.black54),
+                  onPressed: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate ?? DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now(),
+                    );
+                    if (pickedDate != null) {
+                      setState(() {
+                        _selectedDate = pickedDate;
+                      });
+                    }
+                  },
+                ),
               ],
             ),
           ),
@@ -95,9 +115,11 @@ class _FoundScreenState extends State<FoundScreen> {
                   return const Center(child: Text('No found items available.'));
                 }
 
+                final now = DateTime.now();
+                final sevenDaysAgo = now.subtract(const Duration(days: 7));
+
                 // Filter items
-                List<QueryDocumentSnapshot> items =
-                    snapshot.data!.docs.where((doc) {
+                List<QueryDocumentSnapshot> items = snapshot.data!.docs.where((doc) {
                   final data = doc.data() as Map<String, dynamic>;
                   final title = (data['title'] ?? '').toString().toLowerCase();
                   final description =
@@ -105,9 +127,28 @@ class _FoundScreenState extends State<FoundScreen> {
                   final category =
                       (data['category'] ?? '').toString().toLowerCase();
 
-                  return title.contains(_searchQuery) ||
+                  // Check date
+                  final itemDateString = data['date'] ?? '';
+                  DateTime? itemDate;
+                  try {
+                    itemDate = DateFormat('yyyy-MM-dd').parse(itemDateString);
+                  } catch (_) {
+                    itemDate = null;
+                  }
+
+                  final dateMatch = _selectedDate != null
+                      ? itemDate != null &&
+                          itemDate.year == _selectedDate!.year &&
+                          itemDate.month == _selectedDate!.month &&
+                          itemDate.day == _selectedDate!.day
+                      : itemDate != null && itemDate.isAfter(sevenDaysAgo);
+
+                  final searchMatch =
+                      title.contains(_searchQuery) ||
                       description.contains(_searchQuery) ||
                       category.contains(_searchQuery);
+
+                  return dateMatch && searchMatch;
                 }).toList();
 
                 // Sort items
@@ -124,7 +165,6 @@ class _FoundScreenState extends State<FoundScreen> {
                         .toString()
                         .compareTo((dataB['category'] ?? '').toString());
                   } else {
-                    // Default: Sort by Date (newest first)
                     return (dataB['date'] ?? '')
                         .toString()
                         .compareTo((dataA['date'] ?? '').toString());
@@ -133,7 +173,7 @@ class _FoundScreenState extends State<FoundScreen> {
 
                 if (items.isEmpty) {
                   return const Center(
-                      child: Text("No items match your search."));
+                      child: Text("No items match your search or date filter."));
                 }
 
                 return ListView.builder(
@@ -145,6 +185,15 @@ class _FoundScreenState extends State<FoundScreen> {
 
                     item['id'] = doc.id;
                     item['uid'] = item['uid'] ?? '';
+
+                    // Format date
+                    String formattedDate = '-';
+                    if (item['date'] != null && item['date'].toString().isNotEmpty) {
+                      try {
+                        final dt = DateFormat('yyyy-MM-dd').parse(item['date']);
+                        formattedDate = DateFormat('dd MMM yyyy').format(dt);
+                      } catch (_) {}
+                    }
 
                     return InkWell(
                       onTap: () {
@@ -169,15 +218,13 @@ class _FoundScreenState extends State<FoundScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // 📸 Circle Image
                               if (item['photoUrl'] != null &&
                                   item['photoUrl'].toString().isNotEmpty)
                                 CircleAvatar(
                                   radius: 50,
                                   backgroundImage: NetworkImage(item['photoUrl']),
                                   backgroundColor: Colors.grey[200],
-                                  onBackgroundImageError:
-                                      (error, stackTrace) {},
+                                  onBackgroundImageError: (error, stackTrace) {},
                                 )
                               else
                                 const CircleAvatar(
@@ -186,10 +233,7 @@ class _FoundScreenState extends State<FoundScreen> {
                                   child: Icon(Icons.image_not_supported,
                                       size: 40, color: Colors.white),
                                 ),
-
                               const SizedBox(width: 16),
-
-                              // 📝 Item Details
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,8 +241,7 @@ class _FoundScreenState extends State<FoundScreen> {
                                     Text(
                                       "${item['title'] ?? 'Unknown'}",
                                       style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600),
+                                          fontSize: 16, fontWeight: FontWeight.w600),
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
@@ -216,7 +259,7 @@ class _FoundScreenState extends State<FoundScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      "Date: ${item['date'] ?? '-'}",
+                                      "Date: $formattedDate",
                                       style: const TextStyle(fontSize: 13),
                                     ),
                                   ],
@@ -234,7 +277,6 @@ class _FoundScreenState extends State<FoundScreen> {
           ),
         ],
       ),
-      
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'login.dart'; // Navigate to login after splash
+import 'auth/login.dart'; // Navigate to login after splash
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
