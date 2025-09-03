@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // <-- added
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'firebase_options.dart';
@@ -12,11 +12,38 @@ import 'package:lostandfound/pages/my_posts_screen.dart';
 import 'package:lostandfound/pages/post_item_screen.dart';
 import 'package:lostandfound/pages/auth/signup.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  debugPrint("🔔 Background message: ${message.notification?.title}");
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "assets/.env");
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // ✅ FCM setup
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // Request permissions (important for Android 13+ & iOS)
+  await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  // Get FCM token
+  String? token = await messaging.getToken();
+  debugPrint("📲 FCM Token: $token");
+
+  // Foreground message handler
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    debugPrint("🔔 Foreground message: ${message.notification?.title}");
+  });
+
+  // Background handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(const MyApp());
 }
@@ -34,11 +61,10 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         textTheme: GoogleFonts.ralewayTextTheme(),
         scaffoldBackgroundColor: const Color(0xFFF7F6FB),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)
-            .copyWith(
-              primary: Colors.deepPurple,
-              secondary: Colors.deepPurpleAccent,
-            ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple).copyWith(
+          primary: Colors.deepPurple,
+          secondary: Colors.deepPurpleAccent,
+        ),
       ),
       home: const AuthWrapper(),
       routes: {
