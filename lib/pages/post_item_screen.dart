@@ -8,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart' show sha1;
+import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 
 class PostItemScreen extends StatefulWidget {
   const PostItemScreen({super.key});
@@ -27,6 +28,7 @@ class _PostItemScreenState extends State<PostItemScreen> {
   File? selectedImage;
   bool isUploading = false;
 
+  /// Image Picker
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -36,6 +38,7 @@ class _PostItemScreenState extends State<PostItemScreen> {
     }
   }
 
+  /// Upload Image → Cloudinary
   Future<String?> _uploadToCloudinary(File imageFile) async {
     try {
       final cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME'];
@@ -43,16 +46,18 @@ class _PostItemScreenState extends State<PostItemScreen> {
       final apiSecret = dotenv.env['API_SECRET'];
 
       if (cloudName == null || apiKey == null || apiSecret == null) {
-        debugPrint("Missing Cloudinary credentials in .env");
+        debugPrint("❌ Missing Cloudinary credentials in .env");
         return null;
       }
 
-      final timestamp = (DateTime.now().millisecondsSinceEpoch ~/ 1000).toString();
+      final timestamp =
+          (DateTime.now().millisecondsSinceEpoch ~/ 1000).toString();
 
       final signatureRaw = 'timestamp=$timestamp$apiSecret';
       final signature = sha1.convert(utf8.encode(signatureRaw)).toString();
 
-      final url = Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+      final url =
+          Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
 
       final request = http.MultipartRequest('POST', url)
         ..fields['api_key'] = apiKey
@@ -67,15 +72,49 @@ class _PostItemScreenState extends State<PostItemScreen> {
         final data = jsonDecode(resStr);
         return data['secure_url'];
       } else {
-        debugPrint("Cloudinary upload failed: ${response.statusCode}");
+        debugPrint("❌ Cloudinary upload failed: ${response.statusCode}");
         return null;
       }
     } catch (e) {
-      debugPrint("Cloudinary exception: $e");
+      debugPrint("❌ Cloudinary exception: $e");
       return null;
     }
   }
 
+  /// Extract ML Kit labels
+  Future<List<String>> _getImageLabels(File imageFile) async {
+    final inputImage = InputImage.fromFile(imageFile);
+    final options = ImageLabelerOptions(confidenceThreshold: 0.7);
+    final labeler = ImageLabeler(options: options);
+
+    final labels = await labeler.processImage(inputImage);
+    await labeler.close();
+
+    return labels.map((e) => e.label).toList();
+  }
+
+  /// Check Firestore for matches
+  Future<List<Map<String, dynamic>>> _findMatchingItems(
+      List<String> labels) async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('items').get();
+
+    List<Map<String, dynamic>> matches = [];
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      final desc = (data['description'] ?? '').toString().toLowerCase();
+      final title = (data['title'] ?? '').toString().toLowerCase();
+
+      if (labels.any((label) =>
+          title.contains(label.toLowerCase()) ||
+          desc.contains(label.toLowerCase()))) {
+        matches.add(data);
+      }
+    }
+    return matches;
+  }
+
+  /// Submit Item
   Future<void> _submitItem() async {
     if (!_formKey.currentState!.validate()) return;
     if (selectedImage == null) {
@@ -102,6 +141,49 @@ class _PostItemScreenState extends State<PostItemScreen> {
       return;
     }
 
+    /// ✅ Run ML Kit
+    final labels = await _getImageLabels(selectedImage!);
+    debugPrint("✅ ML Kit Labels: $labels");
+
+    /// ✅ Search for matches
+    final matches = await _findMatchingItems(labels);
+
+    if (matches.isNotEmpty) {
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Possible Matches Found"),
+          content: SizedBox(
+            height: 200,
+            child: ListView(
+              children: matches
+                  .map((m) => ListTile(
+                        title: Text(m['title'] ?? ''),
+                        subtitle: Text(m['description'] ?? ''),
+                      ))
+                  .toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text("Post Anyway"),
+            ),
+          ],
+        ),
+      );
+
+      if (proceed != true) {
+        setState(() => isUploading = false);
+        return;
+      }
+    }
+
+    /// ✅ Save post in Firestore
     final user = FirebaseAuth.instance.currentUser!;
     final itemRef = FirebaseFirestore.instance.collection('items').doc();
 
@@ -118,14 +200,16 @@ class _PostItemScreenState extends State<PostItemScreen> {
       'status': 'open',
       'timest': Timestamp.now(),
       'uid': user.uid,
+      'labels': labels, // ✅ store ML Kit labels
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Item Posted Successfully!'),
+        content: Text('✅ Item Posted Successfully!'),
         backgroundColor: Color.fromARGB(255, 101, 101, 196),
       ),
     );
+
     titleController.clear();
     descController.clear();
     trainController.clear();
@@ -154,11 +238,9 @@ class _PostItemScreenState extends State<PostItemScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Type Capsule Buttons
-              const Text(
-                "Type",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+              /// Type
+              const Text("Type",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 8),
               Row(
                 children: ["Lost", "Found"].map((t) {
@@ -169,7 +251,8 @@ class _PostItemScreenState extends State<PostItemScreen> {
                       label: Text(t),
                       selected: isSelected,
                       onSelected: (_) => setState(() => selectedType = t),
-                      selectedColor: const Color.fromARGB(255, 101, 101, 196),
+                      selectedColor:
+                          const Color.fromARGB(255, 101, 101, 196),
                       backgroundColor: Colors.grey[200],
                       labelStyle: TextStyle(
                         color: isSelected ? Colors.white : Colors.black,
@@ -196,26 +279,27 @@ class _PostItemScreenState extends State<PostItemScreen> {
               /// Description
               TextFormField(
                 controller: descController,
-                decoration: _inputDecoration('Description', Icons.description),
+                decoration:
+                    _inputDecoration('Description', Icons.description),
                 maxLines: 3,
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter description' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Enter description'
+                    : null,
               ),
               const SizedBox(height: 16),
 
-              /// Category Dropdown
+              /// Category
               DropdownButtonFormField<String>(
                 value: selectedCategory,
-                items: ['Wallet', 'Electronics', 'Documents', 'Clothing']
+                items: [
+                  'Wallet',
+                  'Electronics',
+                  'Documents',
+                  'Clothing'
+                ]
                     .map((c) => DropdownMenuItem(
                           value: c,
-                          child: Row(
-                            children: [
-                             
-                              const SizedBox(width: 8),
-                              Text(c),
-                            ],
-                          ),
+                          child: Text(c),
                         ))
                     .toList(),
                 onChanged: (val) => setState(() => selectedCategory = val!),
@@ -226,17 +310,17 @@ class _PostItemScreenState extends State<PostItemScreen> {
               /// Train / Station
               TextFormField(
                 controller: trainController,
-                decoration: _inputDecoration('Train No. / Station', Icons.train),
+                decoration:
+                    _inputDecoration('Train No. / Station', Icons.train),
               ),
               const SizedBox(height: 24),
 
               /// Image Upload
-              Text(
-                'Upload Photo',
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
+              Text('Upload Photo',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
               GestureDetector(
                 onTap: _pickImage,
@@ -251,11 +335,8 @@ class _PostItemScreenState extends State<PostItemScreen> {
                   child: selectedImage != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            selectedImage!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
+                          child: Image.file(selectedImage!,
+                              fit: BoxFit.cover, width: double.infinity),
                         )
                       : Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -263,23 +344,22 @@ class _PostItemScreenState extends State<PostItemScreen> {
                             Icon(Icons.cloud_upload,
                                 size: 50, color: Colors.grey),
                             SizedBox(height: 8),
-                            Text(
-                              'Tap to upload image',
-                              style: TextStyle(color: Colors.grey),
-                            ),
+                            Text('Tap to upload image',
+                                style: TextStyle(color: Colors.grey)),
                           ],
                         ),
                 ),
               ),
               const SizedBox(height: 30),
 
-              /// Submit Button
+              /// Submit
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: isUploading ? null : _submitItem,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 101, 101, 196),
+                    backgroundColor:
+                        const Color.fromARGB(255, 101, 101, 196),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -290,9 +370,7 @@ class _PostItemScreenState extends State<PostItemScreen> {
                   label: Text(
                     isUploading ? 'Uploading...' : 'Submit Item',
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -311,7 +389,8 @@ class _PostItemScreenState extends State<PostItemScreen> {
       filled: true,
       fillColor: Colors.white,
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Color.fromARGB(255, 101, 101, 196), width: 2),
+        borderSide: const BorderSide(
+            color: Color.fromARGB(255, 101, 101, 196), width: 2),
         borderRadius: BorderRadius.circular(12),
       ),
     );

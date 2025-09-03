@@ -32,5 +32,8 @@ android {
 flutter { source = "../.." }
 
 dependencies {
-    implementation("com.google.firebase:firebase-messaging:24.0.0")
+    // ✅ Use latest messaging + exclude firebase-iid (conflict fix)
+    implementation("com.google.firebase:firebase-messaging:24.1.2") {
+        exclude(group = "com.google.firebase", module = "firebase-iid")
+    }
 }

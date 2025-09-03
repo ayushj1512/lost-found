@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lostandfound/pages/matchespage.dart' show MatchesPage;
+
 
 class PostedItemsList extends StatelessWidget {
   final String uid;
@@ -34,96 +36,92 @@ class PostedItemsList extends StatelessWidget {
           itemCount: posts.length,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           itemBuilder: (context, index) {
-            final item = posts[index].data() as Map<String, dynamic>;
+            final doc = posts[index];
+            final item = doc.data() as Map<String, dynamic>;
             final photoUrl = item['photoUrl'];
 
-            return Card(
-              elevation: 2,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// Thumbnail
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: photoUrl != null && photoUrl.toString().isNotEmpty
-                          ? Image.network(
-                              photoUrl,
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.broken_image, size: 40),
-                            )
-                          : Container(
-                              width: 60,
-                              height: 60,
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.image, size: 30, color: Colors.white70),
-                            ),
-                    ),
-
-                    const SizedBox(width: 10),
-
-                    /// Item Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          /// Title
-                          Text(
-                            item['title'] ?? '',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-
-                          const SizedBox(height: 4),
-
-                          /// Type + Train
-                          Text(
-                            "${item['type']} • ${item['train'] ?? ''}",
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.black54,
-                            ),
-                          ),
-
-                          /// Date & Category
-                          Text(
-                            "📅 ${item['date'] ?? ''} • 🧾 ${item['category'] ?? ''}",
-                            style: const TextStyle(fontSize: 12, color: Colors.black54),
-                          ),
-
-                          const SizedBox(height: 4),
-
-                          /// Status
-                          // Chip(
-                          //   label: Text(
-                          //     item['status'] ?? '',
-                          //     style: const TextStyle(
-                          //       fontSize: 12,
-                          //       fontWeight: FontWeight.w500,
-                          //     ),
-                          //   ),
-                          //   backgroundColor: item['status'] == 'Open'
-                          //       ? Colors.orange.shade100
-                          //       : Colors.green.shade100,
-                          //   padding: const EdgeInsets.symmetric(horizontal: 8),
-                          //   visualDensity: VisualDensity.compact,
-                          // ),
-                        ],
+            return InkWell(
+              onTap: () {
+                // ✅ Navigate to MatchesPage when tapped
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MatchesPage(postId: doc.id),
+                  ),
+                );
+              },
+              child: Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// Thumbnail
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: photoUrl != null && photoUrl.toString().isNotEmpty
+                            ? Image.network(
+                                photoUrl,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.broken_image, size: 40),
+                              )
+                            : Container(
+                                width: 60,
+                                height: 60,
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.image,
+                                    size: 30, color: Colors.white70),
+                              ),
                       ),
-                    ),
-                  ],
+
+                      const SizedBox(width: 10),
+
+                      /// Item Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /// Title
+                            Text(
+                              item['title'] ?? '',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+
+                            const SizedBox(height: 4),
+
+                            /// Type + Train
+                            Text(
+                              "${item['type']} • ${item['train'] ?? ''}",
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Colors.black54,
+                              ),
+                            ),
+
+                            /// Date & Category
+                            Text(
+                              "📅 ${item['date'] ?? ''} • 🧾 ${item['category'] ?? ''}",
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

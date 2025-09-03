@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lostandfound/components/PostedItemsList.dart';
 import 'package:lostandfound/pages/auth/login.dart';
-import 'package:lostandfound/pages/auth/signup.dart';
 
 class MyPostsScreen extends StatefulWidget {
   const MyPostsScreen({super.key});
