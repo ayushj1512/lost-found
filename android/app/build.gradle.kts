@@ -16,24 +16,41 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // ✅ Kotlin DSL way to enable core library desugaring
+        isCoreLibraryDesugaringEnabled = true
     }
-    kotlinOptions { jvmTarget = "11" }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 
     buildTypes {
-        release { signingConfig = signingConfigs.getByName("debug") }
+        release {
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
 }
 
-flutter { source = "../.." }
+flutter {
+    source = "../.."
+}
 
 dependencies {
-    // ✅ Use latest messaging + exclude firebase-iid (conflict fix)
+    // ✅ Firebase Messaging without firebase-iid
     implementation("com.google.firebase:firebase-messaging:24.1.2") {
         exclude(group = "com.google.firebase", module = "firebase-iid")
     }
+
+    // ✅ Multidex
+    implementation("androidx.multidex:multidex:2.0.1")
+
+    // ✅ Core desugaring (upgrade version to >= 2.1.4)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
+

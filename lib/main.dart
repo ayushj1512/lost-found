@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lostandfound/pages/SearchByImagePage.dart';
+import 'package:lostandfound/pages/matchespage.dart';
+import 'package:lostandfound/services/local_notification_service.dart';
 
 import 'firebase_options.dart';
 import 'package:lostandfound/pages/dashboard_screen.dart';
@@ -11,6 +14,9 @@ import 'package:lostandfound/pages/auth/login.dart';
 import 'package:lostandfound/pages/my_posts_screen.dart';
 import 'package:lostandfound/pages/post_item_screen.dart';
 import 'package:lostandfound/pages/auth/signup.dart';
+
+// ✅ Global navigator key
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -22,6 +28,9 @@ Future<void> main() async {
   await dotenv.load(fileName: "assets/.env");
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // ✅ Initialize local notifications
+  await NotificationService.init();
 
   // ✅ FCM setup
   FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -56,6 +65,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TrainTrack Lost & Found',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey, // ✅ important
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
         useMaterial3: true,
@@ -73,6 +83,23 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => const DashboardScreen(),
         '/postItem': (context) => const PostItemScreen(),
         '/myPosts': (context) => const MyPostsScreen(),
+      },
+      onGenerateRoute: (settings) {
+        // ✅ Safe navigation for notification payload
+        if (settings.name == '/matches') {
+          final args = settings.arguments;
+          if (args != null && args is String && args.isNotEmpty) {
+            return MaterialPageRoute(
+              builder: (_) => MatchesPage(postId: args),
+            );
+          } else {
+            // fallback to SearchByImagePage if payload is null/empty
+            return MaterialPageRoute(
+              builder: (_) => const SearchByImagePage(),
+            );
+          }
+        }
+        return null; // default null
       },
     );
   }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:lostandfound/pages/chat/chat_list_page.dart';
 import 'package:lostandfound/pages/found_screen.dart';
 import 'package:lostandfound/pages/lost_screen.dart';
+import 'package:lostandfound/pages/SearchByImagePage.dart'; // <-- New import
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,24 +24,24 @@ class _HomeScreenState extends State<HomeScreen> {
         .where('users', arrayContains: currentUserId)
         .snapshots()
         .map((snapshot) {
-      int count = 0;
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        final Map<String, dynamic>? lastMessage = data['lastMessage'];
-        if (lastMessage == null) continue;
+          int count = 0;
+          for (var doc in snapshot.docs) {
+            final data = doc.data();
+            final Map<String, dynamic>? lastMessage = data['lastMessage'];
+            if (lastMessage == null) continue;
 
-        final String senderId = lastMessage['senderId'] ?? '';
-        final Map readBy = lastMessage['readBy'] ?? {};
+            final String senderId = lastMessage['senderId'] ?? '';
+            final Map readBy = lastMessage['readBy'] ?? {};
 
-        final bool isUnread = readBy[currentUserId] == false;
-        final bool isNotSender = senderId != currentUserId;
+            final bool isUnread = readBy[currentUserId] == false;
+            final bool isNotSender = senderId != currentUserId;
 
-        if (isNotSender && isUnread) {
-          count++;
-        }
-      }
-      return count;
-    });
+            if (isNotSender && isUnread) {
+              count++;
+            }
+          }
+          return count;
+        });
   }
 
   @override
@@ -65,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         gradient: LinearGradient(
                           colors: [
                             Color.fromARGB(255, 84, 99, 218),
-                            Color.fromARGB(255, 101, 101, 196)
+                            Color.fromARGB(255, 101, 101, 196),
                           ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -74,7 +75,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: SafeArea(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 40), // More vertical padding
+                            horizontal: 24,
+                            vertical: 40,
+                          ), // More vertical padding
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -122,13 +125,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         alignment: Alignment.topRight,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.chat_bubble_outline,
-                                color: Colors.white, size: 28),
+                            icon: const Icon(
+                              Icons.chat_bubble_outline,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                             onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => ChatListPage()),
+                                  builder: (context) => ChatListPage(),
+                                ),
                               );
                             },
                           ),
@@ -164,8 +171,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   width: double.infinity,
                   height: 70,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 209, 9, 9),
                     borderRadius: BorderRadius.circular(12),
@@ -178,9 +187,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         "Lost Items",
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold),
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -198,8 +208,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   width: double.infinity,
                   height: 70,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 33, 186, 33),
                     borderRadius: BorderRadius.circular(12),
@@ -212,9 +224,49 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         "Found Items",
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold),
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Search by Image (Rectangle)
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SearchByImagePage(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 70,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 84, 99, 218),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.image_search, color: Colors.white, size: 30),
+                      SizedBox(width: 12),
+                      Text(
+                        "Search by Image",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -233,10 +285,17 @@ class WaveClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     final path = Path();
     path.lineTo(0, size.height - 80); // Curve start
-    final firstControlPoint = Offset(size.width / 2, size.height + 60); // Deeper curve
+    final firstControlPoint = Offset(
+      size.width / 2,
+      size.height + 60,
+    ); // Deeper curve
     final firstEndPoint = Offset(size.width, size.height - 80);
-    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
-        firstEndPoint.dx, firstEndPoint.dy);
+    path.quadraticBezierTo(
+      firstControlPoint.dx,
+      firstControlPoint.dy,
+      firstEndPoint.dx,
+      firstEndPoint.dy,
+    );
     path.lineTo(size.width, 0);
     path.close();
     return path;

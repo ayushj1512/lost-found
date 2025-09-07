@@ -1,67 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'item_details_screen.dart'; // ✅ import your details page
+import 'item_details_screen.dart';
 
 class MatchesPage extends StatefulWidget {
-  final String postId; // Pass the Firestore document ID of the user's post
-
-  const MatchesPage({super.key, required this.postId});
+  final String? postId; // Nullable
+  const MatchesPage({super.key, this.postId});
 
   @override
   State<MatchesPage> createState() => _MatchesPageState();
 }
 
 class _MatchesPageState extends State<MatchesPage> {
-  bool isLoading = true;
+  bool loading = true;
   List<Map<String, dynamic>> matches = [];
+  String? error;
 
   @override
   void initState() {
     super.initState();
-    _findMatches();
+    if (widget.postId != null && widget.postId!.isNotEmpty) {
+      _findMatches();
+    } else {
+      setState(() {
+        loading = false;
+        error = "Invalid post ID.";
+      });
+    }
   }
 
-  /// Find items in Firestore with overlapping labels
   Future<void> _findMatches() async {
-    final postDoc = await FirebaseFirestore.instance
-        .collection('items')
-        .doc(widget.postId)
-        .get();
+    try {
+      final postSnap = await FirebaseFirestore.instance
+          .collection('items')
+          .doc(widget.postId)
+          .get();
 
-    if (!postDoc.exists) {
-      setState(() => isLoading = false);
-      return;
-    }
-
-    final postData = postDoc.data()!;
-    final List<String> myLabels = List<String>.from(postData['labels'] ?? []);
-
-    final snapshot = await FirebaseFirestore.instance.collection('items').get();
-
-    List<Map<String, dynamic>> foundMatches = [];
-    for (var doc in snapshot.docs) {
-      if (doc.id == widget.postId) continue; // skip own post
-
-      final data = doc.data();
-      final itemLabels = List<String>.from(data['labels'] ?? []);
-
-      int common = myLabels.where((l) => itemLabels.contains(l)).length;
-
-      if (common > 0) {
-        foundMatches.add({
-          ...data,
-          'docId': doc.id, // ✅ keep the Firestore document ID
-          'matchScore': common / myLabels.length,
+      if (!postSnap.exists) {
+        setState(() {
+          loading = false;
+          error = "Post not found.";
         });
+        return;
       }
+
+      final myLabels = List<String>.from(postSnap['labels'] ?? []);
+      if (myLabels.isEmpty) {
+        setState(() {
+          loading = false;
+          error = "No labels found for this post.";
+        });
+        return;
+      }
+
+      final itemsSnap = await FirebaseFirestore.instance.collection('items').get();
+
+      final foundMatches = itemsSnap.docs
+          .where((d) => d.id != widget.postId)
+          .map((d) {
+            final data = d.data();
+            final labels = List<String>.from(data['labels'] ?? []);
+            final common = myLabels.where(labels.contains).length;
+            return common > 0
+                ? {...data, 'docId': d.id, 'score': common / myLabels.length}
+                : null;
+          })
+          .whereType<Map<String, dynamic>>()
+          .toList();
+
+      foundMatches.sort((a, b) => (b['score']).compareTo(a['score']));
+
+      setState(() {
+        matches = foundMatches;
+        loading = false;
+        if (matches.isEmpty) error = "No matches found.";
+      });
+    } catch (e) {
+      setState(() {
+        loading = false;
+        error = "No matches found.";
+      });
+      debugPrint("MatchesPage error: $e");
     }
-
-    foundMatches.sort((a, b) => (b['matchScore']).compareTo(a['matchScore']));
-
-    setState(() {
-      matches = foundMatches;
-      isLoading = false;
-    });
   }
 
   @override
@@ -72,47 +91,44 @@ class _MatchesPageState extends State<MatchesPage> {
         backgroundColor: const Color.fromARGB(255, 101, 101, 196),
         foregroundColor: Colors.white,
       ),
-      body: isLoading
+      body: loading
           ? const Center(child: CircularProgressIndicator())
-          : matches.isEmpty
-          ? const Center(child: Text("No matches found."))
-          : ListView.builder(
-              itemCount: matches.length,
-              itemBuilder: (ctx, i) {
-                final item = matches[i];
-                return Card(
-                  margin: const EdgeInsets.all(10),
-                  child: ListTile(
-                    leading: item['photoUrl'] != null
-                        ? Image.network(
-                            item['photoUrl'],
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
-                          )
-                        : const Icon(Icons.image),
-                    title: Text(item['title'] ?? 'No title'),
-                    subtitle: Text(item['description'] ?? ''),
-                    trailing: Text(
-                      "Score: ${(item['matchScore'] * 100).toStringAsFixed(0)}%",
-                      style: const TextStyle(color: Colors.green),
-                    ),
-                    onTap: () {
-                      // ✅ Navigate to ItemDetailsScreen
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ItemDetailsScreen(
-                            itemData: item,
-                            docId: item['docId'], // pass Firestore doc ID
+          : error != null
+              ? Center(child: Text(error!, style: const TextStyle(fontSize: 16)))
+              : ListView.builder(
+                  itemCount: matches.length,
+                  itemBuilder: (_, i) {
+                    final m = matches[i]; 
+                    return Card(
+                      margin: const EdgeInsets.all(10),
+                      child: ListTile(
+                        leading: m['photoUrl'] != null
+                            ? Image.network(
+                                m['photoUrl'],
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              )
+                            : const Icon(Icons.image),
+                        title: Text(m['title'] ?? 'No title'),
+                        subtitle: Text(m['description'] ?? ''),
+                        trailing: Text(
+                          "${(m['score'] * 100).toStringAsFixed(0)}%",
+                          style: const TextStyle(color: Colors.green),
+                        ),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ItemDetailsScreen(
+                              itemData: m,
+                              docId: m['docId'],
+                            ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }
